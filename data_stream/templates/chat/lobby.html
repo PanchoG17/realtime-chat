@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Home</title>
+    </head>
+    <body>
+        <h1>Chat roulette</h1>
+
+        <form id="form">
+            <input type="text" name="message" placeholder="Send a message"/>
+        </form>
+
+        <div id="messages"></div>
+
+    </body>
+
+    <script type="text/javascript">
+
+        let form = document.getElementById('form')
+        let messages = document.getElementById('messages')
+
+        // Create WS connection
+        let url = `ws://${window.location.host}/ws/echo/`;
+        const chatSocket = new WebSocket(url);
+
+
+        // Manage incoming messages
+        chatSocket.onmessage = function(e){
+
+            let data = JSON.parse(e.data);
+            console.log('Data:', data);
+
+            if(data.type === 'chat'){
+                messages.insertAdjacentHTML('beforeend', `<p>${data.message}</p>`)
+            }
+
+        }
+
+        // Send messages
+        form.addEventListener('submit', (e)=>{
+            e.preventDefault()
+
+            let message = e.target.message.value
+            chatSocket.send(JSON.stringify({
+                'message':message
+            }))
+
+            form.reset()
+        })
+
+
+
+
+    </script>
+
+</html>
