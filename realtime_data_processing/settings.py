@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-whafgel@!++!je7@sn@wn!@y179ep36l8i+lqljnn$m!faj3*u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -43,6 +43,12 @@ INSTALLED_APPS = [
 
 
 ASGI_APPLICATION = 'realtime_data_processing.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default':{
+        'BACKEND':'channels.layers.InMemoryChannelLayer'
+    }
+}
 
 
 MIDDLEWARE = [
