@@ -5,7 +5,8 @@ import json
 
 class ChatConsumer(WebsocketConsumer):
     def connect(self):
-        self.room_group_name = 'test'
+        room_name = self.scope['url_route']['kwargs']['room_name']
+        self.room_group_name = f'room_{room_name}'
 
         async_to_sync(self.channel_layer.group_add)(
             self.room_group_name,
@@ -15,6 +16,7 @@ class ChatConsumer(WebsocketConsumer):
         
         self.send(text_data=json.dumps({
             'type':'connection_established',
+            'room_name':self.room_group_name,
             'message':'You are connected!'
         }))
 

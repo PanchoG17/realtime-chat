@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock title %}
+
+{% block content %}
+    <form id="form">
+        <select id="room_select" required>
+            <option value="" selected disabled>--Choose one--</option>
+            <option value="politic">Politic</option>
+            <option value="economy">Economy</option>
+            <option value="offtopic">Off Topic</option>
+        </select>
+        <input type="submit" value="Enter chatroom"/>
+    </form>
+{% endblock content %}
+
+{% block javascript %}
+    <script type="text/javascript">
+        $("#form").on("submit", (e)=>{
+            e.preventDefault();
+            let room_name = $("#room_select").find(":selected").val();
+            window.location.href = "{% url 'data_stream:chat_room' room_name='xxx' %}".replace("xxx", room_name);
+        })
+    </script>
+{% endblock javascript %}
+

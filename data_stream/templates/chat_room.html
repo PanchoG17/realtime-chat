@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}{{room_name | capfirst}}{% endblock title %}
+
+{% block content %}
+    <h2>Welcome to the {{room_name | capfirst}} chat room</h2>
+
+    <form id="form">
+        <input autofocus type="text" name="message" placeholder="Send a message"/>
+    </form>
+
+    <div id="messages"></div>
+{% endblock content %}
+
+{% block javascript %}
+    <script type="text/javascript">
+
+        let form = $("#form");
+        let messages = $("#messages");
+
+        // Create WS connection
+        let url = `ws://${window.location.host}/chat/{{room_name}}`;
+        const chatSocket = new WebSocket(url);
+
+        // Manage incoming messages
+        chatSocket.onmessage = (e) => {
+            let data = JSON.parse(e.data);
+            console.log(data)
+            if(data.type === 'chat'){
+                messages.append(`<p>${data.message}</p>`)
+            }
+        }
+
+        // Send messages
+        form.on("submit", (e)=>{
+            e.preventDefault()
+            let message = e.target.message.value
+            chatSocket.send(JSON.stringify({
+                'message':message
+            }))
+            form.trigger("reset");
+        })
+
+    </script>
+{% endblock javascript %}
+
+
