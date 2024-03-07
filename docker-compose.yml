@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  # django:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8000:8000"
+  #   depends_on:
+  #     - redis
+  #   environment:
+  #     - DJANGO_SETTINGS_MODULE=myproject.settings
+  #   volumes:
+  #     - .:/app
+  #   networks:
+  #     - backend
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
