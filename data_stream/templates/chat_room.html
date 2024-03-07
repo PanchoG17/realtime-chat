@@ -5,11 +5,14 @@
 {% block content %}
     <h2>Welcome to the {{room_name | capfirst}} chat room</h2>
 
+
     <form id="form">
         <input autofocus type="text" name="message" placeholder="Send a message"/>
     </form>
 
     <div id="messages"></div>
+    <div id="notifications"></div>
+
 {% endblock content %}
 
 {% block javascript %}
@@ -17,26 +20,46 @@
 
         let form = $("#form");
         let messages = $("#messages");
+        let notifications = $("#notifications");
 
         // Create WS connection
         let url = `ws://${window.location.host}/chat/{{room_name}}`;
         const chatSocket = new WebSocket(url);
 
+        // Insert notifications
+        const insertNotification = (notification) => {
+            notifications.append(notification)
+            setTimeout(() => {
+                notification.remove();
+            }, "5000");
+        }
+
         // Manage incoming messages
         chatSocket.onmessage = (e) => {
             let data = JSON.parse(e.data);
-            console.log(data)
+
             if(data.type === 'chat'){
                 messages.append(`<p>${data.message}</p>`)
             }
+
+            if(data.type === 'user_connected'){
+                notification = $(`<h3 style="color:green">${data.message}</h3>`)
+                insertNotification(notification)
+            }
+
+            if(data.type === 'user_disconnected'){
+                notification = $(`<h3 style="color:red">${data.message}</h3>`)
+                insertNotification(notification)
+            }
         }
 
-        // Send messages
+        // Send new message
         form.on("submit", (e)=>{
             e.preventDefault()
             let message = e.target.message.value
             chatSocket.send(JSON.stringify({
-                'message':message
+                'message':message,
+                'user':'{{ user.username }}'
             }))
             form.trigger("reset");
         })
