@@ -1,10 +1,9 @@
+import random
 import tkinter as tk
 import asyncio
 import websockets
 import json
 import threading
-
-uri = "ws://localhost:8000/chat/politic"
 
 class WebSocketClientApp:
     ## Constructor method
@@ -39,10 +38,10 @@ class WebSocketClientApp:
 
     ## Create Tkinter widgets
     def create_widgets(self):
-        self.send_text = tk.Text(self.root, width=40, height=10, wrap=tk.WORD)
+        self.send_text = tk.Text(self.root, width=50, height=10, wrap=tk.WORD)
         self.send_text.pack(side=tk.LEFT, padx=10, pady=10)
 
-        self.receive_text = tk.Text(self.root, width=40, height=10, wrap=tk.WORD)
+        self.receive_text = tk.Text(self.root, width=50, height=10, wrap=tk.WORD)
         self.receive_text.pack(side=tk.RIGHT, padx=10, pady=10)
 
         self.send_button = tk.Button(self.root, text="Send", command=self.send_message)
@@ -73,7 +72,7 @@ class WebSocketClientApp:
         asyncio.run_coroutine_threadsafe(self.send_message_async(message), self.root.loop) if message else None
 
 
-    ## Dispatch message from to server
+    ## Dispatch message to server
     async def send_message_async(self, message):
         try:
             data = {'message': message, 'user': self.user_entry.get().strip()}
@@ -81,6 +80,24 @@ class WebSocketClientApp:
             self.send_text.delete("1.0", tk.END)
         except websockets.ConnectionClosedError:
             print("Connection closed.")
+
+
+    ## Dispatch simulated message to server
+    async def send_simulated_data(self):
+        while True:
+
+            message = f"Simulated message {random.randint(1, 100)}"
+            user = self.user_entry.get().strip()
+            data = {'message': message, 'user': user}
+
+            try:
+                await self.websocket.send(json.dumps(data))
+            except websockets.ConnectionClosedError:
+                print("Connection closed.")
+                break
+
+            # Wait for a random interval between 1 to 2 seconds
+            await asyncio.sleep(random.uniform(1, 2))
 
 
     ## Receive messages from server
@@ -92,12 +109,14 @@ class WebSocketClientApp:
                 data = await self.websocket.recv()
                 data_json = json.loads(data)
                 self.receive_text.insert(tk.END, f"{data_json['message']}\n")
+                self.receive_text.yview_moveto(1.0)
         except websockets.ConnectionClosedError:
             print("Connection closed.")
 
 
-    ## Call connection function and recieve messages
+    ## Call connection function and receive messages
     def websocket_loop(self, user, uri, selected_chat_room):
+
         async def connect_to_server():
             self.websocket = await websockets.connect(uri, extra_headers={'user': user})
 
@@ -105,6 +124,7 @@ class WebSocketClientApp:
         self.root.loop = loop
         asyncio.set_event_loop(loop)
         loop.run_until_complete(connect_to_server())
+        asyncio.run_coroutine_threadsafe(self.send_simulated_data(), loop)
         loop.run_until_complete(self.receive_messages(selected_chat_room))
 
 
