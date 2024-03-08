@@ -59,7 +59,7 @@
             let message = e.target.message.value
             chatSocket.send(JSON.stringify({
                 'message':message,
-                'user':'{{ user.username }}'
+                'user':'{{ user.username | default:"Anonymous user"}}'
             }))
             form.trigger("reset");
         })

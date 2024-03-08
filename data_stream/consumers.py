@@ -84,7 +84,7 @@ class ChatConsumer(WebsocketConsumer):
         agent = event['agent']
         self.send(text_data=json.dumps({
             'type':'user_connected',
-            'message': f'{user} enter to the chatroom',
+            'message': f'## {user} enter to the chatroom ##',
             'agent':agent
         }))
 
