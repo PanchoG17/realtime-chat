@@ -24,9 +24,10 @@ class ChatConsumer(WebsocketConsumer):
         elif ('Python' in user_agent_value):
             agent = 'Python CLI client'
 
-        # Get the user name from headers or scope
+        # Get the user name from scope or headers
         user_name_tuple = next((item for item in self.scope['headers'] if item[0] == b'user'), None)
         user_name_value = user_name_tuple[1].decode('utf-8') if user_name_tuple else None
+
         self.user = self.scope['user'].username or user_name_value or 'Anonymous user'
 
         # Get room name from URL param
@@ -55,7 +56,7 @@ class ChatConsumer(WebsocketConsumer):
     def receive(self, text_data):
         data = json.loads(text_data)
         message = data['message']
-        user = data['user']
+        user = data['user'] or 'Anonymous user'
 
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
@@ -67,7 +68,31 @@ class ChatConsumer(WebsocketConsumer):
         )
 
 
-    # Send message to chat room
+    ## Disconnect function
+    def disconnect(self, close_code):
+
+        async_to_sync(self.channel_layer.group_send)(
+            self.room_group_name,
+            {
+                'type':'user_disconnected',
+                'user':self.user or 'Anonymous user',
+                'close_code': close_code
+            }
+        )
+
+
+    # User connection notification
+    def user_connected(self, event):
+        user = event['user']
+        agent = event['agent']
+        self.send(text_data=json.dumps({
+            'type':'user_connected',
+            'message': f'## {user} enter to the chat room ##',
+            'agent':agent
+        }))
+
+
+    # User message to chat room
     def chat_message(self, event):
         message = event['message']
         user = event['user']
@@ -78,16 +103,12 @@ class ChatConsumer(WebsocketConsumer):
         }))
 
 
-    # User connection notification
-    def user_connected(self, event):
+    # User disconnection notification
+    def user_disconnected(self, event):
         user = event['user']
-        agent = event['agent']
+        close_code = event['close_code']
         self.send(text_data=json.dumps({
-            'type':'user_connected',
-            'message': f'## {user} enter to the chatroom ##',
-            'agent':agent
+            'type':'user_disconnected',
+            'message': f'## {user} leave the chat room ##',
+            'close_code': close_code
         }))
-
-
-    def disconnect(self, close_code):
-        pass
