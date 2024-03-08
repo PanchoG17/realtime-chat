@@ -48,7 +48,7 @@ class WebSocketClientApp:
         self.send_button.pack(side=tk.LEFT, padx=10, pady=5)
 
 
-    ## Connection function
+    ## Start connection button
     def connect_to_server(self):
         user = self.user_entry.get().strip()
         chat_room_index = self.chat_room_listbox.curselection()
@@ -66,13 +66,13 @@ class WebSocketClientApp:
             print("Please select a chat room.")
 
 
-    ## Dispatch message from Tkinter to send_message_async coroutine
+    ## Dispatch chat message from Tkinter to send_message_async function
     def send_message(self):
         message = self.send_text.get("1.0", tk.END).strip()
         asyncio.run_coroutine_threadsafe(self.send_message_async(message), self.root.loop) if message else None
 
 
-    ## Dispatch message to server
+    ## Dispatch chat message to server
     async def send_message_async(self, message):
         try:
             data = {'message': message, 'user': self.user_entry.get().strip()}
@@ -82,7 +82,7 @@ class WebSocketClientApp:
             print("Connection closed.")
 
 
-    ## Dispatch simulated message to server
+    ## Dispatch simulated messages to server
     async def send_simulated_data(self):
         while True:
 
@@ -96,12 +96,13 @@ class WebSocketClientApp:
                 print("Connection closed.")
                 break
 
-            # Wait for a random interval between 1 to 2 seconds
             await asyncio.sleep(random.uniform(1, 2))
 
 
     ## Receive messages from server
     async def receive_messages(self, selected_chat_room):
+        
+        ## First connection message
         self.receive_text.insert(tk.END, f"WELCOME to the {selected_chat_room} chat room!\n")
 
         try:
@@ -114,7 +115,7 @@ class WebSocketClientApp:
             print("Connection closed.")
 
 
-    ## Call connection function and receive messages
+    ## Websocket loop definition
     def websocket_loop(self, user, uri, selected_chat_room):
 
         async def connect_to_server():
