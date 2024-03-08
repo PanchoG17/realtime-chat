@@ -60,7 +60,7 @@ class WebSocketClientApp:
             self.chat_room_listbox.config(state="disabled")
             self.connect_button.config(state="disabled")
             
-            self.websocket_thread = threading.Thread(target=self.websocket_loop, args=(user, uri))
+            self.websocket_thread = threading.Thread(target=self.websocket_loop, args=(user, uri, selected_chat_room))
             self.websocket_thread.daemon = True
             self.websocket_thread.start()
         else:
@@ -84,7 +84,9 @@ class WebSocketClientApp:
 
 
     ## Receive messages from server
-    async def receive_messages(self):
+    async def receive_messages(self, selected_chat_room):
+        self.receive_text.insert(tk.END, f"WELCOME to the {selected_chat_room} chat room!\n")
+
         try:
             while True:
                 data = await self.websocket.recv()
@@ -95,7 +97,7 @@ class WebSocketClientApp:
 
 
     ## Call connection function and recieve messages
-    def websocket_loop(self, user, uri):
+    def websocket_loop(self, user, uri, selected_chat_room):
         async def connect_to_server():
             self.websocket = await websockets.connect(uri, extra_headers={'user': user})
 
@@ -103,7 +105,7 @@ class WebSocketClientApp:
         self.root.loop = loop
         asyncio.set_event_loop(loop)
         loop.run_until_complete(connect_to_server())
-        loop.run_until_complete(self.receive_messages())
+        loop.run_until_complete(self.receive_messages(selected_chat_room))
 
 
 def main():
