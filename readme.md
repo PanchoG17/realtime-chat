@@ -1,4 +1,4 @@
-# Junco Films Real-Time Chat with WebSockets and Redis
+# Real-Time Chat with WebSockets and Redis
 
 Welcome to the **Real-Time Chat** project!. This project provides a real-time chat system using WebSockets technology with Django Channels and Redis for managing channels.
 
@@ -32,6 +32,11 @@ Users can connect to their preferred chat room, including politics, economy, and
 - `realtime_data_processing`: Django settings folder
     - `settings.py`: Configuration settings for Django project.
     - `urls.py`: URL patterns mapping URLs to views.
+
+- `Dockerfile`: Builds the Django server Docker image for the project.
+- `docker-compose.yml`: Configures Docker services.
+- `manage.py`: Manages Django project.
+- `requirements.txt`: Lists Python dependencies for this project.
 
 
 ## Prerequisites
@@ -71,6 +76,8 @@ Follow these steps to run the project:
     python client_launcher.py
     ```
     - Enter your username and select a chat room from the available options.
+    - Creates 10 concurrent instances of the basic_python_client.py, each representing a separate client connection to the chat server.
+    - It only keep listening for incoming messages.
 
 6. Accessing the Application via Tkinter GUI:
     ```console
