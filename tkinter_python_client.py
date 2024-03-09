@@ -6,11 +6,11 @@ import json
 import threading
 
 class WebSocketClientApp:
-    ## Constructor method
     def __init__(self, root):
         self.root = root
         self.root.title("WebSocket Client")
 
+        # Name input
         self.user_label = tk.Label(self.root, text="Enter your name:")
         self.user_label.pack()
 
@@ -29,8 +29,12 @@ class WebSocketClientApp:
         self.chat_room_listbox.insert(tk.END, "economy")
         self.chat_room_listbox.insert(tk.END, "offtopic")
 
+        # Buttons
         self.connect_button = tk.Button(self.root, text="Connect", command=self.connect_to_server)
         self.connect_button.pack()
+
+        self.disconnect_button = tk.Button(self.root, text="Disconnect", command=self.disconnect_from_server, state=tk.DISABLED)
+        self.disconnect_button.pack()
 
         self.websocket = None
         self.create_widgets()
@@ -58,12 +62,27 @@ class WebSocketClientApp:
             self.user_entry.config(state="disabled")
             self.chat_room_listbox.config(state="disabled")
             self.connect_button.config(state="disabled")
+            self.disconnect_button.config(state="normal")
             
             self.websocket_thread = threading.Thread(target=self.websocket_loop, args=(user, uri, selected_chat_room))
             self.websocket_thread.daemon = True
             self.websocket_thread.start()
         else:
             print("Please select a chat room.")
+
+
+    ## Disconnect
+    def disconnect_from_server(self):
+        if self.websocket:
+            asyncio.run_coroutine_threadsafe(self.websocket.close(), self.root.loop)
+            self.user_entry.config(state="normal")
+            self.chat_room_listbox.config(state="normal")
+            self.connect_button.config(state="normal")
+            self.disconnect_button.config(state="disabled")
+            user = self.user_entry.get().strip() or 'Anonymous user'
+            self.receive_text.insert(tk.END, f"## {user} leave the chat room ##\n")
+        else:
+            print("Not connected to any server.")
 
 
     ## Dispatch chat message from Tkinter to send_message_async function
@@ -102,17 +121,22 @@ class WebSocketClientApp:
     ## Receive messages from server
     async def receive_messages(self, selected_chat_room):
         
-        ## First connection message
+        # First connection message
         self.receive_text.insert(tk.END, f"WELCOME to the {selected_chat_room} chat room!\n")
 
-        try:
-            while True:
+        while True:
+            try:
                 data = await self.websocket.recv()
                 data_json = json.loads(data)
                 self.receive_text.insert(tk.END, f"{data_json['message']}\n")
                 self.receive_text.yview_moveto(1.0)
-        except websockets.ConnectionClosedError:
-            print("Connection closed.")
+
+            except websockets.exceptions.ConnectionClosedOK:
+                print("Connection closed succefully.")
+                break
+
+            except websockets.ConnectionClosedError:
+                print("Connection closed.")
 
 
     ## Websocket loop definition
