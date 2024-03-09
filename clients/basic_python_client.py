@@ -13,6 +13,11 @@ async def main(user, uri):
     await receive_messages(user, uri)
 
 if __name__ == "__main__":
-    user = sys.argv[1]
-    uri = sys.argv[2]
-    asyncio.run(main(user, uri))
+
+    try:
+        user = sys.argv[1]
+        uri = sys.argv[2]
+        asyncio.run(main(user, uri))
+
+    except IndexError:
+        print('You must to run the client launcher')

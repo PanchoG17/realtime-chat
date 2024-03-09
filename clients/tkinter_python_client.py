@@ -30,11 +30,15 @@ class WebSocketClientApp:
         self.chat_room_listbox.insert(tk.END, "offtopic")
 
         # Buttons
-        self.connect_button = tk.Button(self.root, text="Connect", command=self.connect_to_server)
+        self.connect_button = tk.Button(self.root, text="Connect", command=self.connect_to_server, fg="green")
         self.connect_button.pack()
 
-        self.disconnect_button = tk.Button(self.root, text="Disconnect", command=self.disconnect_from_server, state=tk.DISABLED)
+        self.disconnect_button = tk.Button(self.root, text="Disconnect", command=self.disconnect_from_server, state=tk.DISABLED, fg="red")
         self.disconnect_button.pack()
+
+        # Label for displaying messages
+        self.message_label = tk.Label(self.root, text="")
+        self.message_label.pack()
 
         self.websocket = None
         self.create_widgets()
@@ -63,12 +67,13 @@ class WebSocketClientApp:
             self.chat_room_listbox.config(state="disabled")
             self.connect_button.config(state="disabled")
             self.disconnect_button.config(state="normal")
-            
+            self.message_label.config(text="")
+
             self.websocket_thread = threading.Thread(target=self.websocket_loop, args=(user, uri, selected_chat_room))
             self.websocket_thread.daemon = True
             self.websocket_thread.start()
         else:
-            print("Please select a chat room.")
+            self.message_label.config(text="Please select a chat room.", fg="red")
 
 
     ## Disconnect
@@ -97,8 +102,11 @@ class WebSocketClientApp:
             data = {'message': message, 'user': self.user_entry.get().strip()}
             await self.websocket.send(json.dumps(data))
             self.send_text.delete("1.0", tk.END)
+
         except websockets.ConnectionClosedError:
-            print("Connection closed.")
+            print("Error: Connection closed unexpectedly.")
+        except Exception as e:
+            print(f"Error: Failed to send message - {e}")
 
 
     ## Dispatch simulated messages to server
@@ -132,15 +140,22 @@ class WebSocketClientApp:
                 self.receive_text.yview_moveto(1.0)
 
             except websockets.exceptions.ConnectionClosedOK:
-                print("Connection closed succefully.")
+                self.message_label.config(text="Connection closed succefully.", fg="green")
                 break
 
             except websockets.ConnectionClosedError:
                 print("Connection closed.")
 
 
-    ## Websocket loop definition
     def websocket_loop(self, user, uri, selected_chat_room):
+        """
+        Connects to the WebSocket server and starts sending and receiving messages.
+        
+        Args:
+            user (str): The username of the client.
+            uri (str): The URI of the WebSocket server.
+            selected_chat_room (str): The selected chat room.
+        """
 
         async def connect_to_server():
             self.websocket = await websockets.connect(uri, extra_headers={'user': user})
