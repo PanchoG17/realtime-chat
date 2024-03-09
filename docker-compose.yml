@@ -1,20 +1,23 @@
-version: '3'
+version: '1'
 
 services:
-  # django:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8000:8000"
-  #   depends_on:
-  #     - redis
-  #   environment:
-  #     - DJANGO_SETTINGS_MODULE=myproject.settings
-  #   volumes:
-  #     - .:/app
-  #   networks:
-  #     - backend
+  django:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+
+    command: 'python manage.py runserver 0.0.0.0:8000'
+    depends_on:
+      - redis
+    environment:
+      - DJANGO_SETTINGS_MODULE=realtime_data_processing.settings
+    volumes:
+      - .:/app
+    networks:
+      - backend
+    
 
   redis:
     image: redis
