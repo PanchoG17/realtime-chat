@@ -7,7 +7,7 @@ async def receive_messages(user, uri):
     async with websockets.connect(uri, extra_headers={'user':user}) as websocket:
         while True:
             message = await websocket.recv()
-            print(f"Received message: {message}")
+            print(f"{user} - Received message: {message}")
 
 async def main(user, uri):
     await receive_messages(user, uri)

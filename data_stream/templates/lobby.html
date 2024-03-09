@@ -3,15 +3,17 @@
 {% block title %}Home{% endblock title %}
 
 {% block content %}
-    <form id="form">
-        <select id="room_select" required>
-            <option value="" selected disabled>--Choose one--</option>
-            <option value="politic">Politic</option>
-            <option value="economy">Economy</option>
-            <option value="offtopic">Off Topic</option>
-        </select>
-        <input type="submit" value="Enter chatroom"/>
-    </form>
+    <div class="text-center">
+        <form id="form">
+            <select id="room_select" class="form-select form-select-lg mb-3" required>
+                <option value="" selected disabled>--Choose your chat room--</option>
+                <option value="politic">Politic</option>
+                <option value="economy">Economy</option>
+                <option value="offtopic">Off Topic</option>
+            </select>
+            <button type="submit" class="btn btn-success">Connect</button>
+        </form>
+    </div>
 {% endblock content %}
 
 {% block javascript %}

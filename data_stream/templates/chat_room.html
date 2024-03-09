@@ -3,15 +3,25 @@
 {% block title %}{{room_name | capfirst}}{% endblock title %}
 
 {% block content %}
-    <h2>Welcome to the {{room_name | capfirst}} chat room</h2>
 
+    <div class="container text-center">
+        <h2 class="my-4">- Welcome to the {{room_name | capfirst}} chat room -</h2>
 
-    <form id="form">
-        <input autofocus type="text" name="message" placeholder="Send a message"/>
-    </form>
+        <form id="form">
+            <div class="input-group mb-3 w-50 mx-auto">
+                <input autofocus type="text" required name="message" autocomplete="off" class="form-control" placeholder="Send a message"/>
+                <span class="input-group-text">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-send" viewBox="0 0 16 16">
+                        <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/>
+                    </svg>
+                </span>
+            </div>
+        </form>
 
-    <div id="messages"></div>
-    <div id="notifications"></div>
+        <textarea id="messages" class="form-control w-50 mx-auto" style="height:12rem" readonly></textarea>
+
+        <div id="notifications"></div>
+    </div>
 
 {% endblock content %}
 
@@ -39,16 +49,17 @@
             let data = JSON.parse(e.data);
 
             if(data.type === 'chat'){
-                messages.append(`<p>${data.message}</p>`)
+                messages.val(`${messages.val()} \n ${data.message}`);
+                messages.scrollTop(messages[0].scrollHeight);
             }
 
             if(data.type === 'user_connected'){
-                notification = $(`<h3 style="color:green">${data.message}</h3>`)
+                notification = $(`<span style="color:green">${data.message}</span><br>`)
                 insertNotification(notification)
             }
 
             if(data.type === 'user_disconnected'){
-                notification = $(`<h3 style="color:red">${data.message}</h3>`)
+                notification = $(`<span style="color:red">${data.message}</span><br>`)
                 insertNotification(notification)
             }
         }
